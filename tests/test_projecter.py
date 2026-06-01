@@ -16,7 +16,7 @@ def test_version() -> None:
 def test_parse_file_reads_metadata() -> None:
     page = parse_file(EXAMPLE)
     assert page.metadata.title == "My Research Project"
-    assert page.metadata.authors[0].name == "Hippolyte Verninas"
+    assert page.metadata.authors[0].name == "John Doe"
     assert page.abstract is not None
 
 

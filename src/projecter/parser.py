@@ -112,7 +112,7 @@ def myst_to_html(markdown: str) -> str:
     parts = publish_parts(
         source=markdown,
         parser=Parser(),
-        writer_name="html5",
+        writer="html5",
         settings_overrides={"embed_stylesheet": False, "report_level": 5},
     )
     html = restore_tables(parts["body"], tables)

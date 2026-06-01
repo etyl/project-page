@@ -28,4 +28,5 @@ htmlcov/
 .idea/
 .vscode/
 
-examples/
+examples/dsg
+*.html
