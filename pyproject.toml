@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "projecter"
+version = "0.1.0"
+description = "Generate static HTML project pages from MyST markdown (research papers, with citations and equations)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Hippolyte Verninas", email = "etyl.sani@gmail.com" },
+]
+keywords = ["markdown", "myst", "static-site", "research", "project-page"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "jinja2>=3.1",
+    "myst-parser>=2.0",
+    "docutils>=0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/projecter"
+Issues = "https://github.com/yourusername/projecter/issues"
+
+[project.scripts]
+projecter = "projecter.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/projecter"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
