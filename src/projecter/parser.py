@@ -273,6 +273,7 @@ def parse_file(path: str | Path) -> Page:
         links=_parse_links(meta.get("links")),
         description=meta.get("description"),
         keywords=meta.get("keywords") or [],
+        template=meta.get("template") or "ml-page",
     )
 
     abstract = None

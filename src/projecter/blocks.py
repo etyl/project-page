@@ -53,6 +53,9 @@ class Metadata:
     # Used for the social/meta tags in <head>.
     description: Optional[str] = None
     keywords: list[str] = field(default_factory=list)
+    # Template to render with: a short name (e.g. "ml-page", "ml-blog") from
+    # ``renderer.TEMPLATES``, or a raw template filename.
+    template: str = "ml-page"
 
 
 @dataclass

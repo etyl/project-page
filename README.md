@@ -44,6 +44,30 @@ Display math, figures and citations go here.
 
 See [examples/index.md](examples/index.md) for a complete example.
 
+## Templates
+
+Pages render with the modern Bulma-based layout by default. Pick a different
+template per page with a `template:` front-matter key, using a short name:
+
+```yaml
+---
+title: "My Research Project"
+template: ml-blog
+---
+```
+
+Available templates (registered in [renderer.py](src/projecter/renderer.py),
+files in [src/projecter/templates/](src/projecter/templates/)):
+
+| Name | File | Look |
+| --- | --- | --- |
+| `ml-page` (default) | `page.html.jinja` | Modern academic project page (Bulma, Inter, gradient hero) |
+| `ml-blog` | `latex.html.jinja` | Classic LaTeX article style — Computer Modern type, single column, numbered sections, justified text |
+
+The `template:` value may also be a raw template filename. Both templates
+consume the same `Page` data (metadata, abstract, sections, figures, citations,
+BibTeX), so any page can switch between them by changing one line.
+
 ## Headings and tables
 
 * `##` renders as a section title.
@@ -157,7 +181,8 @@ A `t=`/`start=` offset on the URL is honoured, and `:autoplay:`/`:muted:`/
 | [renderer.py](src/projecter/renderer.py) | `Page` → HTML via the Jinja template |
 | [builder.py](src/projecter/builder.py) | Discover pages and write HTML siblings |
 | [cli.py](src/projecter/cli.py) | `projecter build` command |
-| [templates/page.html.jinja](src/projecter/templates/page.html.jinja) | The HTML page template |
+| [templates/page.html.jinja](src/projecter/templates/page.html.jinja) | Default HTML page template (modern academic layout) |
+| [templates/latex.html.jinja](src/projecter/templates/latex.html.jinja) | Classic LaTeX article-style template |
 
 Some pieces are deliberately left as stubs (marked with `TODO`) to fill in:
 splitting sections further into `Figure` blocks, rendering BibTeX into a

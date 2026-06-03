@@ -32,7 +32,7 @@ def build_file(path: str | Path) -> Path:
     """Build a single markdown file into an HTML file in the same directory."""
     path = Path(path)
     page = parse_file(path)
-    html = render_page(page)
+    html = render_page(page, page.metadata.template)
     out_path = path.with_suffix(".html")
     out_path.write_text(html, encoding="utf-8")
     return out_path
