@@ -10,10 +10,12 @@ citations are handled here with the same two-phase strategy as
   markdown (so the markdown pass can't escape the raw ``<a>``).
 * :func:`restore_citations` swaps the rendered links back in afterwards.
 
-The number ``n`` is the entry's 1-based position in the bibliography, which is
-the order the ``<ol>`` of references is rendered in (see ``page.html.jinja``), so
-clicking ``[3]`` jumps to the third reference. An unknown key renders as ``[?]``
-so a typo is visible rather than silently dropped.
+The number ``n`` is the entry's 1-based position in the ``numbering`` map it is
+handed. The parser builds that map in order of first citation in the page (see
+:func:`cited_keys_in_order`) and the references ``<ol>`` is rendered in the same
+order, so ``[1]`` is the first work cited and clicking it jumps to that entry.
+An unknown key renders as ``[?]`` so a typo is visible rather than silently
+dropped.
 """
 
 from __future__ import annotations
@@ -27,6 +29,23 @@ _KEY = r"[\w.:+/-]+"
 _CITE_RE = re.compile(rf"\[(@{_KEY}(?:\s*;\s*@{_KEY})*)\]")
 
 _PLACEHOLDER = "CITEPLACEHOLDER{}CITE"
+
+
+def cited_keys_in_order(text: str) -> list[str]:
+    """Return the citation keys in ``text`` in first-appearance order.
+
+    Scans the same ``[@key]`` / ``[@a; @b]`` spans as :func:`protect_citations`,
+    de-duplicating so each key appears once, at the position it is first cited.
+    The parser uses this to number references by appearance and to drop entries
+    that are never cited.
+    """
+    order: dict[str, None] = {}  # dict keeps insertion order and de-duplicates
+    for match in _CITE_RE.finditer(text):
+        for raw in match.group(1).split(";"):
+            key = raw.strip().lstrip("@")
+            if key:
+                order.setdefault(key, None)
+    return list(order)
 
 
 def _render_group(keys: list[str], numbering: dict[str, int]) -> str:

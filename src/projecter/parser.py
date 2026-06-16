@@ -311,6 +311,22 @@ def parse_file(path: str | Path) -> Page:
         if bib_path.exists():
             citations = parse_bibtex(bib_path.read_text(encoding="utf-8"))
 
+    # Keep only cited works and order them by first appearance in the page
+    # (reading order: abstract, then body, then acknowledgements). This drives
+    # both the reference numbering and the rendered references list, so an
+    # uncited entry never shows up and `[1]` is always the first work cited.
+    if citations:
+        from projecter.citations import cited_keys_in_order
+
+        by_key = {c.key: c for c in citations}
+        scan = "\n".join(
+            str(part or "")
+            for part in (meta.get("abstract"), body, meta.get("acknowledgements"))
+        )
+        citations = [
+            by_key[key] for key in cited_keys_in_order(scan) if key in by_key
+        ]
+
     abstract = None
     if meta.get("abstract"):
         abstract = Abstract(html=myst_to_html(str(meta["abstract"]), citations))

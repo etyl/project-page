@@ -312,7 +312,9 @@ def test_parse_file_bibliography_loaded(write_md, tmp_path) -> None:
     (tmp_path / "refs.bib").write_text(
         "@article{ref1, title={A}, year={2020}}\n", encoding="utf-8"
     )
-    path = write_md("---\ntitle: T\nbibliography: refs.bib\n---\n\nbody\n")
+    path = write_md(
+        "---\ntitle: T\nbibliography: refs.bib\n---\n\nWe cite [@ref1] here.\n"
+    )
     citations = parse_file(path).citations
     assert [c.key for c in citations] == ["ref1"]
 
