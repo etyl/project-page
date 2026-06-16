@@ -60,10 +60,16 @@ swaps spans for a unique placeholder token (e.g. `MATHJAXPLACEHOLDER0MATHJAX`):
 | `media.py` | `{video}`/`{audio}` directives (incl. YouTube embeds) | `MEDIAPLACEHOLDER` |
 | `figures.py` | `{figure-grid}` directive → side-by-side figures | `FIGGRIDPLACEHOLDER` |
 | `math.py` | `$...$` / `$$...$$` / `\(...\)` / `\[...\]` (left for MathJax) | `MATHJAXPLACEHOLDER` |
+| `citations.py` | `[@key]` / `[@a; @b]` inline citations → `#cite-` links | `CITEPLACEHOLDER` |
 
 **Order matters** in `myst_to_html`: tables, media, and grids are protected
 first; **math is protected last** so it only scans remaining prose (the others
 are already extracted) and the markdown pass can't inject `<em>` into formulas.
+Citations are protected after math (so a `[@key]`-like span inside math is
+already a placeholder) and resolve `[@key]` to `[n]` linking `#cite-key`, where
+`n` is the entry's 1-based position in the `bibliography` (matching the `<ol>` of
+references). They are only resolved when a `bibliography` is present; an unknown
+key renders as `[?]`.
 On restore, math unwraps a `<p>placeholder</p>` so a display equation renders as
 a block. When adding a new directive/syntax, follow this same pattern and make
 sure tests assert the placeholder never leaks into the output.
@@ -77,7 +83,9 @@ only the multi-image `{figure-grid}` is custom.
   fields map directly onto `Metadata` (`authors`, `affiliations`, `badge`,
   `venue`, `links`, `bibliography`, `cite`/`bibtex`, `acknowledgements`).
 - Several behaviours are intentionally left as `TODO` stubs to specialise
-  (further section splitting into `Figure` blocks, full citation styling,
-  inline citation resolution).
+  (further section splitting into `Figure` blocks, full citation styling).
+  Inline `[@key]` citations are resolved by `citations.py` (pandoc-style; see
+  the protect/restore table above).
 - `examples/index.md` is the canonical example and is used directly by the test
   suite — keep it valid and in sync when changing the page format.
+z

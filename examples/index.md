@@ -14,6 +14,7 @@ affiliations:
 links:
   - { label: "Paper", url: "https://example.com/paper.pdf", icon: "fas fa-file-pdf" }
   - { label: "Code", url: "https://github.com/Etyl/projecter", icon: "fab fa-github" }
+bibliography: refs.bib
 abstract: |
   This is a short abstract for the example project page. It exists so the test
   suite has a stable, self-contained page to parse: it declares a title, a list
@@ -27,7 +28,8 @@ real content to work with.
 
 ## Method
 
-A short description of the method goes here.
+A short description of the method goes here. We build on prior work
+[@park2021nerfies] and the analysis of [@mildenhall2020nerf; @park2021nerfies].
 
 ### Details
 

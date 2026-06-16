@@ -88,16 +88,23 @@ def _parse_links(raw: Any) -> list[Link]:
     return links
 
 
-def myst_to_html(markdown: str) -> str:
+def myst_to_html(
+    markdown: str, citations: list[Citation] | None = None
+) -> str:
     """Render a MyST markdown fragment to an HTML string.
 
     Uses the docutils frontend shipped with ``myst-parser`` so we get a
     standalone HTML body without pulling in Sphinx. LaTeX ``tabular`` / ``table``
     environments are converted to HTML tables around the markdown pass.
+
+    ``citations`` (if given) supplies the bibliography used to resolve
+    ``[@key]`` inline citations into links; their number is the entry's 1-based
+    position in the list.
     """
     from docutils.core import publish_parts
     from myst_parser.docutils_ import Parser
 
+    from projecter.citations import protect_citations, restore_citations
     from projecter.figures import protect_figure_grids, restore_figure_grids
     from projecter.latex import protect_tables, restore_tables
     from projecter.math import protect_math, restore_math
@@ -109,6 +116,12 @@ def myst_to_html(markdown: str) -> str:
     # Math last, so it only scans prose (tables/media/grids are already pulled
     # out) and the markdown pass can't mangle the LaTeX inside the delimiters.
     markdown, maths = protect_math(markdown)
+    # Citations after math, so a `[@key]`-like span inside protected math is
+    # already a placeholder and won't be mistaken for a citation.
+    cites: list[str] = []
+    if citations:
+        numbering = {c.key: i + 1 for i, c in enumerate(citations)}
+        markdown, cites = protect_citations(markdown, numbering)
     parts = publish_parts(
         source=markdown,
         parser=Parser(),
@@ -118,7 +131,8 @@ def myst_to_html(markdown: str) -> str:
     html = restore_tables(parts["body"], tables)
     html = restore_media(html, media)
     html = restore_figure_grids(html, grids)
-    return restore_math(html, maths)
+    html = restore_math(html, maths)
+    return restore_citations(html, cites)
 
 
 def _slugify(text: str) -> str:
@@ -127,14 +141,17 @@ def _slugify(text: str) -> str:
     return re.sub(r"[\s_-]+", "-", slug) or "section"
 
 
-def split_sections(body: str) -> list[Section]:
+def split_sections(
+    body: str, citations: list[Citation] | None = None
+) -> list[Section]:
     """Split a markdown body into :class:`Section` blocks by ``##``/``###``.
 
     Each ``##`` or ``###`` heading starts a new section; the heading line
     becomes the section title and ``level`` (2 or 3), and the lines until the
     next heading become its rendered body. Content before the first heading is
     kept as a level-0 untitled preamble. Headings inside fenced code blocks are
-    ignored.
+    ignored. ``citations`` is threaded through to resolve ``[@key]`` inline
+    citations (see :func:`myst_to_html`).
     """
     heading_re = re.compile(r"^(#{2,3})\s+(.*?)\s*#*\s*$")
     fence_re = re.compile(r"^\s*(```|~~~)")
@@ -164,7 +181,12 @@ def split_sections(body: str) -> list[Section]:
             n += 1
         used.add(label)
         sections.append(
-            Section(label=label, title=title, html=myst_to_html(text), level=level or 2)
+            Section(
+                label=label,
+                title=title,
+                html=myst_to_html(text, citations),
+                level=level or 2,
+            )
         )
     return sections
 
@@ -276,16 +298,18 @@ def parse_file(path: str | Path) -> Page:
         template=meta.get("template") or "ml-page",
     )
 
-    abstract = None
-    if meta.get("abstract"):
-        abstract = Abstract(html=myst_to_html(str(meta["abstract"])))
-
+    # Parse the bibliography first so it is available to resolve `[@key]` inline
+    # citations in the abstract, sections and acknowledgements.
     citations: list[Citation] = []
     bib = meta.get("bibliography")
     if bib:
         bib_path = (path.parent / bib).resolve()
         if bib_path.exists():
             citations = parse_bibtex(bib_path.read_text(encoding="utf-8"))
+
+    abstract = None
+    if meta.get("abstract"):
+        abstract = Abstract(html=myst_to_html(str(meta["abstract"]), citations))
 
     # "Cite this work" block: an explicit `bibtex:` string, or a `cite:` path
     # to a .bib file relative to the page.
@@ -298,12 +322,12 @@ def parse_file(path: str | Path) -> Page:
 
     acknowledgements = None
     if meta.get("acknowledgements"):
-        acknowledgements = myst_to_html(str(meta["acknowledgements"]))
+        acknowledgements = myst_to_html(str(meta["acknowledgements"]), citations)
 
     return Page(
         metadata=metadata,
         abstract=abstract,
-        sections=split_sections(body),
+        sections=split_sections(body, citations),
         citations=citations,
         bibtex=bibtex,
         acknowledgements=acknowledgements,
