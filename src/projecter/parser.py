@@ -266,7 +266,11 @@ def parse_bibtex(text: str) -> list[Citation]:
     external dependency); swap in ``pybtex`` if you need full citation styles.
     """
     citations: list[Citation] = []
-    for chunk in text.split("@")[1:]:
+    # Entries begin with ``@type{`` at the start of a line. Splitting on a bare
+    # ``@`` would also break inside field values that legitimately contain one
+    # (e.g. social handles like ``@user`` in an author list), so only split at a
+    # line-leading ``@``.
+    for chunk in re.split(r"(?m)^[ \t]*@", text)[1:]:
         entry = "@" + chunk.strip()
         key = ""
         if "{" in entry:

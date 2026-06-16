@@ -195,6 +195,33 @@ def test_parse_bibtex_multiple_entries() -> None:
     assert [c.key for c in citations] == ["a", "b"]
 
 
+def test_parse_bibtex_at_sign_in_field_value_does_not_split_entry() -> None:
+    # A field value may legitimately contain ``@`` (e.g. social handles in an
+    # author list). It must not be mistaken for the start of a new entry.
+    bib = (
+        "@misc{handles,\n"
+        "  author = {Keller Jordan and @fernbear.bsky.social and @Grad62304977},\n"
+        "  year = {2024}\n"
+        "}\n"
+    )
+    citations = parse_bibtex(bib)
+    assert [c.key for c in citations] == ["handles"]
+    assert "@fernbear.bsky.social" in citations[0].bibtex
+    assert "2024." in citations[0].rendered
+
+
+def test_parse_bibtex_at_sign_does_not_leak_extra_entries() -> None:
+    # Two entries surrounding one whose author field has two ``@`` handles must
+    # still parse as exactly two entries, with no empty/garbage keys.
+    bib = (
+        "@article{before, year={2019}}\n"
+        "@misc{middle, author = {A B and @handle.one and @handle.two}, year={2024}}\n"
+        "@inproceedings{after, year={2023}}\n"
+    )
+    citations = parse_bibtex(bib)
+    assert [c.key for c in citations] == ["before", "middle", "after"]
+
+
 def test_parse_bibtex_empty_string() -> None:
     assert parse_bibtex("") == []
 
