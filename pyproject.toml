@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
-    { name = "Hippolyte Verninas", email = "etyl.sani@gmail.com" },
+    { name = "Hippolyte Verninas"},
 ]
 keywords = ["markdown", "myst", "static-site", "research", "project-page"]
 classifiers = [
