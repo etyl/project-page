@@ -7,6 +7,7 @@ from typing import Iterable
 
 from projecter.parser import _split_front_matter, parse_file
 from projecter.renderer import render_page
+from projecter.svg import inline_svgs
 
 
 def is_project_page(path: Path) -> bool:
@@ -32,7 +33,7 @@ def build_file(path: str | Path) -> Path:
     """Build a single markdown file into an HTML file in the same directory."""
     path = Path(path)
     page = parse_file(path)
-    html = render_page(page, page.metadata.template)
+    html = inline_svgs(render_page(page, page.metadata.template), path.parent)
     out_path = path.with_suffix(".html")
     out_path.write_text(html, encoding="utf-8")
     return out_path

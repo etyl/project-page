@@ -44,7 +44,7 @@
       margin: 0;
       padding: 64px 20px 96px;
       /* Counters that drive LaTeX-style section/equation numbering. */
-      counter-reset: section figure table;
+      counter-reset: section subsection figure table;
     }
 
     .paper { max-width: var(--measure); margin: 0 auto; }
@@ -105,7 +105,9 @@
     /* `##` -> numbered "1 Section". */
     h2.sec-title {
       counter-increment: section;
-      counter-reset: subsection;
+      /* counter-set, not counter-reset: each heading sits in its own <section>,
+         so a reset here would not reach the sibling sections' h3s. */
+      counter-set: subsection 0;
       font-size: 1.4rem; font-weight: 700; margin: 1.8rem 0 .7rem;
     }
     h2.sec-title::before { content: counter(section) "\00a0\00a0"; }
