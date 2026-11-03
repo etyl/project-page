@@ -113,5 +113,7 @@ class Page:
     bibtex: Optional[str] = None
     # Rendered HTML for the acknowledgements section.
     acknowledgements: Optional[str] = None
+    # Extra CSS from the `css:` front-matter key, inlined into <head>.
+    css: Optional[str] = None
     # Path the page was parsed from, used to decide where to write the HTML.
     source_path: Optional[str] = None

@@ -177,6 +177,9 @@
     .bibx-copy.copied .bibx-clip { display: none; }
     .bibx-copy.copied .bibx-check { display: block; }
   </style>
+  {% if page.css %}<style>
+{{ page.css | safe }}
+  </style>{% endif %}
 </head>
 <body>
 

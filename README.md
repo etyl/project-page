@@ -68,6 +68,13 @@ The `template:` value may also be a raw template filename. Both templates
 consume the same `Page` data (metadata, abstract, sections, figures, citations,
 BibTeX), so any page can switch between them by changing one line.
 
+Custom CSS goes in a separate file, inlined into `<head>` so the page stays
+self-contained. `css:` takes a path (or a list of paths) relative to the page:
+
+```yaml
+css: style.css
+```
+
 ## Headings and tables
 
 * `##` renders as a section title.

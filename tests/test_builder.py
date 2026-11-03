@@ -115,3 +115,11 @@ def test_build_paths_explicit_list(tmp_path) -> None:
     outputs = build_paths([a])
     assert outputs == [tmp_path / "a.html"]
     assert outputs[0].exists()
+
+
+def test_build_inlines_css(tmp_path) -> None:
+    (tmp_path / "s.css").write_text(".mine { color: red; }", encoding="utf-8")
+    a = tmp_path / "a.md"
+    a.write_text('---\ntitle: "A"\ncss: s.css\n---\nx\n', encoding="utf-8")
+    html = build_file(a).read_text(encoding="utf-8")
+    assert ".mine { color: red; }" in html.split("</head>")[0]

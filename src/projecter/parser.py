@@ -344,6 +344,15 @@ def parse_file(path: str | Path) -> Page:
     if meta.get("acknowledgements"):
         acknowledgements = myst_to_html(str(meta["acknowledgements"]), citations)
 
+    # `css:` is a stylesheet path (or list of paths) relative to the page,
+    # inlined so the output stays a single self-contained file.
+    css_files = meta.get("css") or []
+    if isinstance(css_files, str):
+        css_files = [css_files]
+    css = "\n".join(
+        (path.parent / f).read_text(encoding="utf-8") for f in css_files
+    ) or None
+
     return Page(
         metadata=metadata,
         abstract=abstract,
@@ -351,5 +360,6 @@ def parse_file(path: str | Path) -> Page:
         citations=citations,
         bibtex=bibtex,
         acknowledgements=acknowledgements,
+        css=css,
         source_path=str(path),
     )
